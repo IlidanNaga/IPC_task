@@ -13,15 +13,20 @@ struct msgp {
     char msgtext[100];
 };
 
-#define amount 10
-#define shift 11
-
 
 int main (int argc, char **argv) {
 
-    int numb[2] = {amount, amount};
+    int amount = 0;
 
-    printf("Defined as %d sender processes atm\n", numb[0]);
+    if (argc < 2) {
+        printf("Try again with amount of processes\n");
+        return -1;
+    } else {
+        printf("Waiting for %d processes\n", atoi(argv[1]));
+        amount = atoi(argv[1]);
+    }
+
+    int numb[2] = {amount, amount};
 
     int fd = open("help_file.txt", O_CREAT | O_TRUNC | O_WRONLY, 0777);
     write(fd, numb, 2 * sizeof(int));
@@ -30,8 +35,7 @@ int main (int argc, char **argv) {
     key_t key = ftok("/home/ilidannaga/CLionProjects/myshell/mshell/wtf.c", 'a');
     int msgid = msgget(key, IPC_CREAT | 0666);
 
-    int got_end[amount] = {0};
-
+    int got_end = 0;
     int flag = 1;
 
     while (flag) {
@@ -41,18 +45,14 @@ int main (int argc, char **argv) {
         msgrcv(msgid, &message,100, 0, 0);
 
         if (message.msgtype > amount) {
-            got_end[message.msgtype - shift] = 1;
+            got_end ++;
         } else {
             printf("copy number %ld: ", message.msgtype);
             puts(message.msgtext);
         }
 
-        int i;
-        flag = 0;
-        for (i = 0; i < amount; i++) {
-            if (!got_end[i])
-                flag = 1;
-        }
+        if (got_end >= amount)
+            break;
     }
 
     msgctl(msgid, IPC_RMID, 0);

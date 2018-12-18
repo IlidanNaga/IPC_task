@@ -38,7 +38,7 @@ int main (int argc, char **argv) {
 
     close(fd);
 
-    sleep(1);
+
     key_t key = ftok("/home/ilidannaga/CLionProjects/myshell/mshell/wtf.c", 'a');
     int msgid = msgget(key, IPC_CREAT);
 
@@ -51,6 +51,7 @@ int main (int argc, char **argv) {
         memmove(message.msgtext, argv[i], sizeof(argv[i]));
 
         msgsnd(msgid, &message, 100, 0);
+        sleep(1);
     }
 
     message.msgtype = die;
